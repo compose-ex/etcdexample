@@ -13,6 +13,7 @@ import com.ibm.etcd.client.kv.WatchUpdate;
 
 import io.grpc.stub.StreamObserver;
 import org.slf4j.LoggerFactory;
+
 import static com.ibm.etcd.client.KeyUtils.bs;
 
 import java.io.IOException;
@@ -45,20 +46,23 @@ public class App {
 
         // Setting up a threadpool
 
-        ExecutorService threadpool=Executors.newFixedThreadPool(10);
+        ExecutorService threadpool = Executors.newFixedThreadPool(10);
 
+        // Get the KvClient
         KvClient kvclient = client.getKvClient();
 
         final StreamObserver<WatchUpdate> observer = new StreamObserver<WatchUpdate>() {
 
             @Override
             public void onNext(WatchUpdate value) {
-                System.out.println("watch event: "+value);
+                System.out.println("watch event: " + value);
             }
+
             @Override
             public void onError(Throwable t) {
-                System.out.println("watch error: "+t);
+                System.out.println("watch error: " + t);
             }
+
             @Override
             public void onCompleted() {
                 System.out.println("watch completed");
@@ -111,7 +115,7 @@ public class App {
 
         watch = kvclient.watch(bs("/hello/")).asPrefix().executor(threadpool).start(observer);
 
-        for(int n=1;n<100;n++) {
+        for (int n = 1; n < 100; n++) {
             kvclient.put(bs("/hello/" + n), bs("test")).sync();
         }
 
